@@ -1,3 +1,13 @@
+FROM ruby:2.7.4-buster as builder
+
+COPY * /app/
+WORKDIR /app
+RUN gem install bundler
+RUN bundle update --bundler
+RUN bundle install
+
+RUN bundle exec rake build -t -v
+
 FROM registry.access.redhat.com/ubi8/ruby-27
 
 ARG VERSION
@@ -16,12 +26,16 @@ ENV FLUENT_USER fluent
 
 USER root
 
-COPY *.gem /tmp/
-COPY licenses /licenses
+COPY --from=builder /app/pkg/fluent-plugin-*.gem /tmp/
+
+RUN mkdir /licenses
+COPY --from=builder /app/LICENSE /licenses/LICENSE
 
 RUN dnf install -y jq
 
-COPY Gemfile* ./
+COPY docker/Gemfile_docker ./Gemfile
+COPY docker/Gemfile.lock ./
+
 RUN yum update -y \
    && npm install -g n \
    && yum remove -y nodejs \
