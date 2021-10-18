@@ -33,8 +33,7 @@ COPY --from=builder /app/LICENSE /licenses/LICENSE
 
 RUN dnf install -y jq
 
-COPY --from=builder /app/docker/Gemfile_docker ./Gemfile
-COPY --from=builder /app/docker/Gemfile.lock ./
+COPY --from=builder /app/docker/Gemfile* ./
 
 RUN yum update -y \
    && npm install -g n \
