@@ -1,6 +1,6 @@
 FROM ruby:2.7.4-buster as builder
 
-COPY * /app/
+ADD ./ /app/
 WORKDIR /app
 RUN gem install bundler
 RUN bundle update --bundler
@@ -33,8 +33,8 @@ COPY --from=builder /app/LICENSE /licenses/LICENSE
 
 RUN dnf install -y jq
 
-COPY docker/Gemfile_docker ./Gemfile
-COPY docker/Gemfile.lock ./
+COPY --from=builder /app/docker/Gemfile_docker ./Gemfile
+COPY --from=builder /app/docker/Gemfile.lock ./
 
 RUN yum update -y \
    && npm install -g n \
